@@ -1,7 +1,22 @@
 import { useState, useCallback } from "react"
 import { useStellarContext } from "../context/StellarProvider"
-import { sendPayment, SendPaymentAbortedError, isPreflightError } from "../actions/sendPayment"
-import type { SendPaymentOptions, SendPaymentResult, StellarError } from "../types"
+import { getHorizonServer, isNativeAsset, isIssuedAsset, canSignTransactions } from "../utils"
+import { asFeeSource, resolveFee } from "../utils/fees"
+import { getWalletAdapter } from "../wallets"
+import {
+  createStellarError,
+  toStellarError,
+  toSubmissionError,
+  StellarError as StellarErrorClass,
+} from "../errors"
+import { accountKey } from "../cache"
+import type {
+  SendPaymentOptions,
+  SendPaymentResult,
+  Asset,
+  MemoInput,
+  StellarError,
+} from "../types"
 
 export interface UseSendPaymentReturn {
   send: (options: SendPaymentOptions) => Promise<SendPaymentResult & { error?: string }>
@@ -45,6 +60,33 @@ export function useSendPayment(): UseSendPaymentReturn {
 
   const send = useCallback(
     async (options: SendPaymentOptions): Promise<SendPaymentResult & { error?: string }> => {
+      if (!wallet.connected || !wallet.address) {
+        throw createStellarError(
+          "WALLET_NOT_CONNECTED",
+          "Wallet not connected. Call connect() first."
+        )
+      }
+      if (!wallet.wallet) {
+        throw new Error("No wallet adapter selected. Call connect() first.")
+      }
+
+      if (!canSignTransactions()) {
+        throw createStellarError(
+          "VALIDATION_ERROR",
+          "Transaction signing is only available in the browser or React Native. " +
+            'Move your component to a "use client" boundary in Next.js / Remix.'
+        )
+      }
+
+      // Check for network mismatch
+      if (wallet.walletNetwork && wallet.network !== wallet.walletNetwork) {
+        throw createStellarError(
+          "WRONG_NETWORK",
+          `Network mismatch: Provider is on ${wallet.network} but wallet is on ${wallet.walletNetwork}. ` +
+            `Switch your wallet to ${wallet.network} or call refreshWalletNetwork() to update.`
+        )
+      }
+
       setLoading(true)
       setError(null)
       setResult(null)
