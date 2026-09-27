@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react"
 import { sendPayment, SendPaymentAbortedError, isPreflightError } from "../actions/sendPayment"
 import { useStellarContext } from "../context/StellarProvider"
+import { canSignTransactions } from "../utils"
 import { createStellarError } from "../errors"
 import type { SendPaymentOptions, SendPaymentResult, StellarError } from "../types"
 
