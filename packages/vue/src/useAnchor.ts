@@ -1,11 +1,11 @@
-import { ref, watch, onScopeDispose, isRef } from 'vue'
-import type { Ref } from 'vue'
-import { toStellarError } from '@use-stellar/core'
-import type { AnchorInfo, StellarError } from '@use-stellar/core'
+import { ref, watch, onScopeDispose, isRef } from "vue"
+import type { Ref } from "vue"
+import { toStellarError } from "@use-stellar/core"
+import type { AnchorInfo, StellarError } from "@use-stellar/core"
 
 // Assume fetchAnchorInfo is exported from core as per vue-17
 // @ts-ignore
-import { fetchAnchorInfo } from '@use-stellar/core'
+import { fetchAnchorInfo } from "@use-stellar/core"
 
 export interface UseAnchorOptions {
   domain: string | Ref<string> | (() => string)
@@ -26,7 +26,7 @@ export function useAnchor(options: UseAnchorOptions): UseAnchorReturn {
   let abortController: AbortController | null = null
 
   const getDomain = () => {
-    if (typeof options.domain === 'function') {
+    if (typeof options.domain === "function") {
       return (options.domain as () => string)()
     }
     return isRef(options.domain) ? options.domain.value : options.domain

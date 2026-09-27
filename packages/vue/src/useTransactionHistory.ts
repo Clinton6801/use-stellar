@@ -1,38 +1,40 @@
-import { ref, computed, watch, isRef, onScopeDispose, toValue } from 'vue'
-import type { MaybeRefOrGetter } from 'vue'
-import { toStellarError } from '@use-stellar/core'
-import type { StellarError, NormalizedTransaction } from '@use-stellar/core'
+import { ref, computed, watch, isRef, onScopeDispose, toValue } from "vue"
+import type { MaybeRefOrGetter } from "vue"
+import { toStellarError } from "@use-stellar/core"
+import type { StellarError, NormalizedTransaction } from "@use-stellar/core"
 
 // @ts-ignore
-import { fetchTransactionHistoryPage, transactionHistoryKey } from '@use-stellar/core'
+import { fetchTransactionHistoryPage, transactionHistoryKey } from "@use-stellar/core"
 // @ts-ignore
-import { useQuery } from './useQuery'
+import { useQuery } from "./useQuery"
 // @ts-ignore
-import { getNextCursor, getPrevCursor } from '@use-stellar/core'
+import { getNextCursor, getPrevCursor } from "@use-stellar/core"
 // @ts-ignore
-import { useWallet } from './useWallet'
+import { useWallet } from "./useWallet"
 
 export interface UseTransactionHistoryOptions {
   address?: MaybeRefOrGetter<string | null>
   limit?: MaybeRefOrGetter<number>
-  order?: MaybeRefOrGetter<'asc' | 'desc'>
+  order?: MaybeRefOrGetter<"asc" | "desc">
   cursor?: MaybeRefOrGetter<string | undefined>
 }
 
 export interface UseTransactionHistoryReturn {
-  transactions: import('vue').Ref<NormalizedTransaction[]>
-  loading: import('vue').Ref<boolean>
-  error: import('vue').Ref<StellarError | null>
+  transactions: import("vue").Ref<NormalizedTransaction[]>
+  loading: import("vue").Ref<boolean>
+  error: import("vue").Ref<StellarError | null>
   refetch: () => void
   fetchNext: () => Promise<void>
   fetchPrev: () => Promise<void>
-  hasNext: import('vue').Ref<boolean>
-  hasPrev: import('vue').Ref<boolean>
+  hasNext: import("vue").Ref<boolean>
+  hasPrev: import("vue").Ref<boolean>
 }
 
-export function useTransactionHistory(options: UseTransactionHistoryOptions = {}): UseTransactionHistoryReturn {
+export function useTransactionHistory(
+  options: UseTransactionHistoryOptions = {}
+): UseTransactionHistoryReturn {
   const wallet = useWallet ? useWallet() : { address: ref(null) }
-  
+
   const currentCursor = ref<string | undefined>(toValue(options.cursor))
 
   watch(
@@ -44,14 +46,26 @@ export function useTransactionHistory(options: UseTransactionHistoryOptions = {}
 
   const resolvedAddress = computed(() => toValue(options.address) ?? wallet.address?.value)
   const resolvedLimit = computed(() => toValue(options.limit) ?? 10)
-  const resolvedOrder = computed(() => toValue(options.order) ?? 'desc')
+  const resolvedOrder = computed(() => toValue(options.order) ?? "desc")
 
   const queryKey = computed(() => {
-    if (!resolvedAddress.value) return ['transactionHistory', 'disabled'] as const
-    return transactionHistoryKey('network', 'public', resolvedAddress.value, resolvedLimit.value, resolvedOrder.value, currentCursor.value)
+    if (!resolvedAddress.value) return ["transactionHistory", "disabled"] as const
+    return transactionHistoryKey(
+      "network",
+      "public",
+      resolvedAddress.value,
+      resolvedLimit.value,
+      resolvedOrder.value,
+      currentCursor.value
+    )
   })
 
-  const { data, loading, error: rawError, refetch } = useQuery({
+  const {
+    data,
+    loading,
+    error: rawError,
+    refetch,
+  } = useQuery({
     queryKey,
     queryFn: async () => {
       if (!resolvedAddress.value) return { records: [], hasNext: false, hasPrev: false }
@@ -65,8 +79,8 @@ export function useTransactionHistory(options: UseTransactionHistoryOptions = {}
     enabled: computed(() => Boolean(resolvedAddress.value)),
   })
 
-  const error = computed(() => rawError.value ? toStellarError(rawError.value) : null)
-  
+  const error = computed(() => (rawError.value ? toStellarError(rawError.value) : null))
+
   const transactions = computed(() => data.value?.records ?? [])
   const hasNext = computed(() => data.value?.hasNext ?? false)
   const hasPrev = computed(() => data.value?.hasPrev ?? false)
@@ -95,6 +109,6 @@ export function useTransactionHistory(options: UseTransactionHistoryOptions = {}
     fetchNext,
     fetchPrev,
     hasNext,
-    hasPrev
+    hasPrev,
   }
 }

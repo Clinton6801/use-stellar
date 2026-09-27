@@ -125,7 +125,7 @@ export function createQueryObserver<T>(options: QueryObserverOptions<T>): QueryO
     const entry = store.getSnapshot<T>(queryKey)
     return {
       data: entry?.data ?? null,
-      loading: enabled ? (entry?.loading ?? false) : false,
+      loading: enabled ? entry?.loading ?? false : false,
       error: entry?.error ?? null,
       updatedAt: entry?.updatedAt ?? null,
     }

@@ -9,6 +9,7 @@ import {
   toSubmissionError,
   StellarError as StellarErrorClass,
 } from "../errors"
+import { sendPayment, SendPaymentAbortedError, isPreflightError } from "../actions/sendPayment"
 import { accountKey } from "../cache"
 import type {
   SendPaymentOptions,

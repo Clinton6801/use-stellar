@@ -90,7 +90,7 @@ export default function BalanceDemo() {
           <h4 style={{ color: "#888", fontSize: 12, marginBottom: 4, textTransform: "uppercase" }}>
             Native Balance
           </h4>
-          <Row label="XLM" value={xlm.loading ? "..." : (xlm.balance ?? "—")} />
+          <Row label="XLM" value={xlm.loading ? "..." : xlm.balance ?? "—"} />
         </div>
 
         {/* Issued Assets */}
@@ -98,7 +98,7 @@ export default function BalanceDemo() {
           <h4 style={{ color: "#888", fontSize: 12, marginBottom: 4, textTransform: "uppercase" }}>
             Issued Assets
           </h4>
-          <Row label="USDC" value={usdc.loading ? "..." : (usdc.balance ?? "—")} />
+          <Row label="USDC" value={usdc.loading ? "..." : usdc.balance ?? "—"} />
         </div>
 
         {/* Liquidity Pool Shares */}

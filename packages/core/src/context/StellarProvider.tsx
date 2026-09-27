@@ -215,7 +215,7 @@ export interface StellarProviderProps {
 function resolveAutoConnect(
   autoConnect: boolean | AutoConnectOptions | undefined
 ): Required<AutoConnectOptions> {
-  const options = typeof autoConnect === "boolean" ? { enabled: autoConnect } : (autoConnect ?? {})
+  const options = typeof autoConnect === "boolean" ? { enabled: autoConnect } : autoConnect ?? {}
 
   return {
     enabled: options.enabled ?? false,

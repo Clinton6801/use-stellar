@@ -9,10 +9,10 @@ describe("walletConnectAdapter", () => {
         name: "Test",
         description: "Test App",
         url: "https://test.com",
-        icons: []
-      }
+        icons: [],
+      },
     })
-    
+
     expect(adapter.metadata.type).toBe("walletconnect")
     expect(adapter.metadata.supported).toBe(true)
     expect(adapter.metadata.platforms).toContain("web")
