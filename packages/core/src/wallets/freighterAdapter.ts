@@ -1,5 +1,4 @@
-import type { StellarNetwork, WalletNetworkId } from "../types"
-import { NETWORK_PASSPHRASES } from "../types"
+import type { StellarNetwork } from "../types"
 import type { WalletAdapter, WalletNetworkState, WalletNetworkDetails } from "./types"
 import { WalletAdapterError } from "./types"
 import { FREIGHTER_WALLET_TYPE, resolveNetworkFromPassphrase } from "./constants"
@@ -70,8 +69,6 @@ async function loadFreighter(): Promise<FreighterApi> {
   }
   return freighterPromise
 }
-
-
 
 async function getFreighterNetworkDetails(_network: StellarNetwork): Promise<WalletNetworkDetails> {
   const freighter = await loadFreighter()

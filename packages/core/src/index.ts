@@ -84,7 +84,11 @@ export {
 
 import { freighterAdapter } from "./wallets/freighterAdapter"
 import { albedoAdapter } from "./wallets/albedoAdapter"
-import { FREIGHTER_WALLET_TYPE, NETWORK_PASSPHRASES, resolveNetworkFromPassphrase } from "./wallets/constants"
+import {
+  FREIGHTER_WALLET_TYPE,
+  NETWORK_PASSPHRASES,
+  resolveNetworkFromPassphrase,
+} from "./wallets/constants"
 
 registerWalletAdapter(freighterAdapter, { override: true })
 registerWalletAdapter(albedoAdapter, { override: true })
