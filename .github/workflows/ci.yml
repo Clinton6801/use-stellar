@@ -32,6 +32,8 @@ jobs:
         run: pnpm build:lib
       - name: Type check
         run: pnpm typecheck
+      - name: Expo example check
+        run: pnpm --filter @use-stellar/example-react-native-expo typecheck
 
   test:
     name: Unit tests
