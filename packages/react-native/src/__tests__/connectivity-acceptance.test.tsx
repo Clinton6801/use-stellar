@@ -1,9 +1,9 @@
 /**
  * Connectivity Acceptance Test
  * ────────────────────────────
- * 
+ *
  * Demonstrates the harness in action: fetching pauses and resumes with connectivity.
- * 
+ *
  * Acceptance Criteria:
  * - Fetching begins when online
  * - Fetching pauses when connectivity is lost
@@ -50,9 +50,7 @@ describe("Connectivity acceptance: fetching pauses and resumes with connectivity
 
         try {
           // In production, this would be a real network call
-          await mockServer.loadAccount(
-            "GDX76CSVSJMYE7PMG2JI7CMERG4CK3UNKX4G6SXZJCY2NLJEWXA2XRSS"
-          )
+          await mockServer.loadAccount("GDX76CSVSJMYE7PMG2JI7CMERG4CK3UNKX4G6SXZJCY2NLJEWXA2XRSS")
           setFetchCount(c => c + 1)
           setError(null)
         } catch (err) {

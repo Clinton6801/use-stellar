@@ -2,7 +2,7 @@
  * React Native Module Mock
  * ────────────────────────
  * Provides jest.fn() stubs for React Native's core modules and components.
- * 
+ *
  * This allows tests to run in a Node/jsdom environment without the native runtime.
  * Re-exports the real react-native but replaces native modules (AppState, Linking, etc.)
  * with controllable mocks from test-utils.

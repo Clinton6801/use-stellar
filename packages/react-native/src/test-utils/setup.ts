@@ -2,7 +2,7 @@
  * React Native Jest Setup File
  * ────────────────────────────
  * Runs once per test file, before any tests execute.
- * 
+ *
  * Responsibilities:
  * 1. Enable fake timers globally for deterministic polling/retry behavior
  * 2. Configure mock reset hooks to prevent test pollution

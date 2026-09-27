@@ -17,7 +17,12 @@ import {
   StellarProvider as CoreStellarProvider,
   type StellarProviderProps as CoreStellarProviderProps,
 } from "@use-stellar/core"
-import type { AutoConnectOptions, CustomNetworkConfig, QueryConfig, StellarNetwork } from "@use-stellar/core"
+import type {
+  AutoConnectOptions,
+  CustomNetworkConfig,
+  QueryConfig,
+  StellarNetwork,
+} from "@use-stellar/core"
 import type { Storage } from "./platform/asyncStorageSession"
 import { createAsyncStorageAdapter } from "./platform/asyncStorageSession"
 import { createAppStateFocusManager } from "./platform/appStateFocus"

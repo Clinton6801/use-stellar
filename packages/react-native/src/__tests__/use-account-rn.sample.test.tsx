@@ -1,10 +1,10 @@
 /**
  * Sample React Native Hook Test: useAccount
  * ─────────────────────────────────────────
- * 
+ *
  * Demonstrates the test harness being used to test a core hook in a React Native context.
  * Shows how lifecycle controls and mocks work together with a real hook.
- * 
+ *
  * This is a sample/reference test — the actual hook tests live in packages/core.
  * This demonstrates that the RN harness can be used for RN-specific hook variants.
  */

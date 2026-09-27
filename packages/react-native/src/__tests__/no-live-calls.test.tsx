@@ -1,10 +1,10 @@
 /**
  * No Live Network Calls Test
  * ──────────────────────────
- * 
+ *
  * Verifies that the test harness properly mocks all external dependencies.
  * No real network calls should be made during tests.
- * 
+ *
  * Acceptance Criteria:
  * - Horizon requests are mocked (loadAccount, submitTransaction, etc.)
  * - Soroban RPC requests are mocked (simulateTransaction, sendTransaction, etc.)
@@ -169,7 +169,6 @@ describe("No live network calls", () => {
     it("WalletConnect does not make real network requests", async () => {
       // Connecting to WalletConnect should not make real HTTP/WebSocket requests
       // The mock simulates the connection locally
-
       // This would normally hit WalletConnect's relay servers
       // Our mock just sets state
     })

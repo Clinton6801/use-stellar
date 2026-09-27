@@ -107,7 +107,7 @@ describe("netInfoOnline", () => {
 
     it("handles null isConnected state as offline", () => {
       mockNetInfo = {
-        addEventListener: jest.fn((listener) => {
+        addEventListener: jest.fn(listener => {
           // Simulate offline (null)
           listener({ isConnected: null })
           return { unsubscribe: jest.fn() }

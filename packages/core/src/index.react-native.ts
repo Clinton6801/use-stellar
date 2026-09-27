@@ -66,35 +66,18 @@ export type { CreateAccountOptions, UseCreateAccountReturn } from "./types"
 
 export * from "./hooks/useOrderBook"
 export type { OrderbookEntry, UseOrderbookOptions, UseOrderbookReturn } from "./types"
-import {
+export {
   WalletAdapterError,
   getWalletAdapter,
   getWalletAdapters,
   hasWalletAdapter,
   registerWalletAdapter,
 } from "./wallets"
-
-export {
-  WalletAdapterError,
-  getWalletAdapter,
-  getWalletAdapters,
-  hasWalletAdapter,
-  registerWalletAdapter,
-}
-
-import { freighterAdapter } from "./wallets/freighterAdapter"
-import { albedoAdapter } from "./wallets/albedoAdapter"
-import { FREIGHTER_WALLET_TYPE, NETWORK_PASSPHRASES, resolveNetworkFromPassphrase } from "./wallets/constants"
-
-registerWalletAdapter(freighterAdapter, { override: true })
-registerWalletAdapter(albedoAdapter, { override: true })
-
 export {
   FREIGHTER_WALLET_TYPE,
   NETWORK_PASSPHRASES,
-  freighterAdapter,
   resolveNetworkFromPassphrase,
-}
+} from "./wallets/constants"
 
 // ── Errors ─────────────────────────────────────────────────────────────────
 export {

@@ -1,9 +1,9 @@
 /**
  * AppState Acceptance Test
  * ──────────────────────
- * 
+ *
  * Demonstrates the harness in action: polling pauses when the app backgrounded.
- * 
+ *
  * Acceptance Criteria:
  * - Polling begins when component renders
  * - Polling pauses when AppState changes to "background"

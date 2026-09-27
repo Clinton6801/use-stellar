@@ -37,9 +37,9 @@ export interface OnlineManager {
  */
 export function createNetInfoOnlineManager(): OnlineManager {
   let netInfo: {
-    addEventListener: (
-      listener: (state: { isConnected: boolean | null }) => void
-    ) => { unsubscribe: () => void }
+    addEventListener: (listener: (state: { isConnected: boolean | null }) => void) => {
+      unsubscribe: () => void
+    }
     fetch: () => Promise<{ isConnected: boolean | null }>
   } | null = null
   let isOnline = true

@@ -85,12 +85,8 @@ describe("asyncStorageSession", () => {
       const removeResult = storage.removeItem("key")
 
       expect(getResult instanceof Promise || getResult === null).toBe(true)
-      expect(
-        setResult === undefined || setResult instanceof Promise
-      ).toBe(true)
-      expect(
-        removeResult === undefined || removeResult instanceof Promise
-      ).toBe(true)
+      expect(setResult === undefined || setResult instanceof Promise).toBe(true)
+      expect(removeResult === undefined || removeResult instanceof Promise).toBe(true)
     })
 
     it("in-memory fallback stores and retrieves values", () => {
