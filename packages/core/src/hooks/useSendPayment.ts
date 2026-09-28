@@ -1,5 +1,4 @@
 import { useState, useCallback } from "react"
-import { sendPayment, SendPaymentAbortedError, isPreflightError } from "../actions/sendPayment"
 import { useStellarContext } from "../context/StellarProvider"
 import { getHorizonServer, isNativeAsset, isIssuedAsset, canSignTransactions } from "../utils"
 import { asFeeSource, resolveFee } from "../utils/fees"
@@ -19,9 +18,6 @@ import type {
   MemoInput,
   StellarError,
 } from "../types"
-import { canSignTransactions } from "../utils"
-import { createStellarError } from "../errors"
-import type { SendPaymentOptions, SendPaymentResult, StellarError } from "../types"
 
 export interface UseSendPaymentReturn {
   send: (options: SendPaymentOptions) => Promise<SendPaymentResult & { error?: string }>
