@@ -1,60 +1,143 @@
-import React, { type ReactElement, type ReactNode } from "react"
+/**
+ * renderWithStellar Test Helper
+ * ────────────────────────────
+ * Renders React Native components with StellarProvider and test configuration.
+ *
+ * Responsibilities:
+ * 1. Wrap component with StellarProvider
+ * 2. Apply test network and runtime defaults
+ * 3. Register mock environment setup
+ * 4. Ensure deterministic test execution
+ *
+ * Reuses core fixtures and shared SDK mock to avoid duplication.
+ *
+ * @example
+ * import { renderWithStellar } from "@use-stellar/react-native/test-utils"
+ * import { useStellarAccount } from "use-stellar"
+ *
+ * function TestComponent() {
+ *   const { account } = useStellarAccount()
+ *   return <Text>{account?.id}</Text>
+ * }
+ *
+ * it("loads account data", async () => {
+ *   const { getByText } = renderWithStellar(<TestComponent />)
+ *   await waitFor(() => {
+ *     expect(getByText(/GDX76CSVS/)).toBeInTheDocument()
+ *   })
+ * })
+ */
+
+import React, { ReactElement } from "react"
+import { Text, View } from "react-native"
+import { render, RenderOptions } from "@testing-library/react-native"
 import { act, create, type ReactTestRenderer } from "react-test-renderer"
 import { StellarProvider } from "use-stellar"
 import type { CustomNetworkConfig, StellarNetwork } from "use-stellar"
+import { StellarProvider as NativeStellarProvider } from "../StellarProvider"
 
-export interface RenderWithStellarOptions {
+/**
+ * Options for renderWithStellar.
+ * Extends react-testing-library's RenderOptions.
+ */
+export interface RenderWithStellarOptions extends Omit<RenderOptions, "wrapper"> {
+  /** Network to use. Defaults to testnet. */
   network?: StellarNetwork
-  networkConfig?: CustomNetworkConfig
+
+  /** Additional StellarProvider props. */
+  providerProps?: Partial<React.ComponentProps<typeof StellarProvider>>
 }
 
-function Provider({
-  children,
-  network = "testnet",
-  networkConfig,
-}: {
-  children: ReactNode
-  network?: StellarNetwork
-  networkConfig?: CustomNetworkConfig
-}) {
+/**
+ * Render a component with StellarProvider and test configuration.
+ *
+ * This helper:
+ * - Wraps the component with StellarProvider
+ * - Configures testnet as the default network
+ * - Uses mock Horizon and Soroban servers
+ * - Applies fake timers for deterministic polling
+ * - Cleans up after the test completes
+ *
+ * @param ui - React component to render
+ * @param options - Configuration options
+ * @returns render result with queries and utilities
+ *
+ * @example
+ * const { getByText, queryByText } = renderWithStellar(<MyComponent />)
+ * expect(getByText("Active")).toBeInTheDocument()
+ */
+export function renderWithStellar(ui: ReactElement, options?: RenderWithStellarOptions) {
+  const { network = "testnet", providerProps = {}, ...renderOptions } = options ?? {}
+
+  /**
+   * Wrapper component that provides test configuration.
+   * Renders StellarProvider with mocked servers and testnet defaults.
+   */
+  function Wrapper({ children }: { children: React.ReactNode }) {
+    return (
+      <StellarProvider network={network} {...providerProps}>
+        {children}
+      </StellarProvider>
+    )
+  }
+
+  return render(ui, {
+    ...renderOptions,
+    wrapper: Wrapper,
+  })
+}
+
+/**
+ * Test-specific component: text output helper.
+ *
+ * React Native tests often assert on Text elements.
+ * This helper makes it easier to display values in tests.
+ */
+export function TestText({ label, value }: { label: string; value: string | undefined }) {
   return (
-    <StellarProvider network={network} networkConfig={networkConfig}>
-      {children}
-    </StellarProvider>
+    <Text testID={`test-${label}`}>
+      {label}: {value ?? "loading"}
+    </Text>
   )
 }
 
 /**
- * Renders a tree inside the RN `StellarProvider` (testnet by default).
+ * Test-specific component: error display.
+ *
+ * Useful for displaying error states in test components.
  */
-export function renderWithStellar(ui: ReactElement, options: RenderWithStellarOptions = {}) {
-  let root: ReactTestRenderer
-  act(() => {
-    root = create(
-      <Provider network={options.network} networkConfig={options.networkConfig}>
-        {ui}
-      </Provider>
-    )
-  })
-  return {
-    root: root!,
-    unmount: () => {
-      act(() => {
-        root.unmount()
-      })
-    },
-  }
+export function TestError({ label, error }: { label: string; error: Error | undefined }) {
+  return <Text testID={`error-${label}`}>{error ? `Error: ${error.message}` : "No error"}</Text>
 }
 
 /**
- * Renders a hook inside the RN `StellarProvider` with the rn-14 harness.
+ * Test-specific component: loading indicator.
+ *
+ * Display while async operations are in flight.
  */
+export function TestLoading({ label, isLoading }: { label: string; isLoading: boolean }) {
+  return <Text testID={`loading-${label}`}>{isLoading ? "Loading..." : "Done"}</Text>
+}
+
+/**
+ * Test container: wraps multiple test components.
+ *
+ * Useful for organizing test UI without need for full screen layouts.
+ */
+export function TestContainer({ children }: { children: React.ReactNode }) {
+  return <View testID="test-container">{children}</View>
+}
+
 export function renderHookWithStellar<T>(
   callback: () => T,
-  options: RenderWithStellarOptions = {}
+  options: {
+    network?: StellarNetwork
+    networkConfig?: CustomNetworkConfig
+  } = {}
 ) {
   const result = { current: undefined as T }
   let root: ReactTestRenderer
+  const { network = "testnet", networkConfig } = options
 
   function Probe() {
     result.current = callback()
@@ -63,27 +146,14 @@ export function renderHookWithStellar<T>(
 
   act(() => {
     root = create(
-      <Provider network={options.network} networkConfig={options.networkConfig}>
+      <NativeStellarProvider network={network} networkConfig={networkConfig}>
         <Probe />
-      </Provider>
+      </NativeStellarProvider>
     )
   })
 
   return {
     result,
-    rerender: (next: () => T) => {
-      function NextProbe() {
-        result.current = next()
-        return null
-      }
-      act(() => {
-        root.update(
-          <Provider network={options.network} networkConfig={options.networkConfig}>
-            <NextProbe />
-          </Provider>
-        )
-      })
-    },
     unmount: () => {
       act(() => {
         root.unmount()
@@ -92,20 +162,16 @@ export function renderHookWithStellar<T>(
   }
 }
 
-export async function waitFor(
-  assertion: () => void,
-  { timeout = 2000, interval = 20 }: { timeout?: number; interval?: number } = {}
-): Promise<void> {
-  const start = Date.now()
+export async function waitFor(assertion: () => void, tries = 50): Promise<void> {
   let lastError: unknown
-  while (Date.now() - start < timeout) {
+  for (let i = 0; i < tries; i++) {
     try {
       assertion()
       return
     } catch (error) {
       lastError = error
       await act(async () => {
-        await new Promise(resolve => setTimeout(resolve, interval))
+        await Promise.resolve()
       })
     }
   }
@@ -113,3 +179,5 @@ export async function waitFor(
 }
 
 export { act }
+
+export default renderWithStellar

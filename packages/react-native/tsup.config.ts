@@ -8,5 +8,16 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   treeshake: true,
-  external: ["react", "react-native", "use-stellar", "@stellar/stellar-sdk"],
+  banner: { js: '"use client";' },
+  external: [
+    "react",
+    "react-native",
+    "@stellar/stellar-sdk",
+    "@albedo-link/intent",
+    "@stellar/freighter-api",
+    "@react-native-async-storage/async-storage",
+    "@react-native-community/netinfo",
+    "@walletconnect/react-native-compat",
+    "use-stellar",
+  ],
 })

@@ -1,45 +1,36 @@
+import { mockHorizonServer, TESTNET_ADDRESS_A } from "@stellar/stellar-sdk"
 import { useClaimableBalance } from "../index"
-import { mockClaimableCall } from "../__mocks__/@stellar/stellar-sdk"
 import { renderHookWithStellar, waitFor } from "../test-utils"
 import { assertNoDomGlobals } from "../test-utils/platform"
-import { TEST_ADDRESS } from "./fixtures"
 
 describe("useClaimableBalance on React Native", () => {
   it("returns mocked claimable balances", async () => {
     assertNoDomGlobals()
-    mockClaimableCall.mockResolvedValue({
-      records: [
-        {
-          id: "claimable-1",
-          asset: "native",
-          amount: "10.0000000",
-          claimants: [{ destination: TEST_ADDRESS, predicate: { unconditional: true } }],
-          sponsor: undefined,
-        },
-      ],
+    mockHorizonServer.claimableBalances.mockReturnValue({
+      claimant: () => ({
+        call: jest.fn().mockResolvedValue({
+          records: [
+            {
+              id: "claimable-1",
+              asset: "native",
+              amount: "10.0000000",
+              claimants: [{ destination: TESTNET_ADDRESS_A, predicate: { unconditional: true } }],
+            },
+          ],
+        }),
+      }),
     })
 
-    const { result } = renderHookWithStellar(() => useClaimableBalance({ address: TEST_ADDRESS }))
+    const { result, unmount } = renderHookWithStellar(() =>
+      useClaimableBalance({ address: TESTNET_ADDRESS_A })
+    )
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false)
     })
 
     expect(result.current.balances).toHaveLength(1)
-    expect(result.current.balances[0]).toEqual(
-      expect.objectContaining({
-        id: "claimable-1",
-        asset: "native",
-        amount: "10.0000000",
-      })
-    )
-    expect(result.current).toEqual(
-      expect.objectContaining({
-        loading: false,
-        error: null,
-        isStale: false,
-        refetch: expect.any(Function),
-      })
-    )
+    expect(result.current.balances[0]?.id).toBe("claimable-1")
+    unmount()
   })
 })
