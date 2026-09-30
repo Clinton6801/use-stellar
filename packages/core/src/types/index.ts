@@ -556,7 +556,14 @@ export interface AutoConnectOptions {
    */
   persistAddress?: boolean
   /** Where to persist. Defaults to `"local"` (`localStorage`). */
-  storage?: "local" | "session"
+  storage?: "local" | "session" | SessionStorageAdapter
+}
+
+/** Storage-compatible adapter for persisting non-secret wallet session metadata. */
+export interface SessionStorageAdapter {
+  getItem(key: string): string | null | Promise<string | null>
+  setItem(key: string, value: string): void | Promise<void>
+  removeItem(key: string): void | Promise<void>
 }
 
 /**

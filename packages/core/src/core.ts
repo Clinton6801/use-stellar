@@ -113,3 +113,8 @@ export type {
   WalletNetworkDetails,
   WalletNetworkState,
 } from "./wallets"
+export * from "./queries/account"
+export * from "./queries/asset"
+export * from "./queries/claimableBalance"
+export * from "./queries/federation"
+export * from "./queries/transaction"
