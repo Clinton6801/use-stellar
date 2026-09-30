@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef } from "react"
 import { useStellarContext, WALLET_SESSION_STORAGE_KEY } from "../context/StellarProvider"
 import { isBrowser } from "../utils"
-import type { AutoConnectOptions, StellarNetwork, WalletState, WalletType } from "../types"
+import type { AutoConnectOptions, SessionStorageAdapter, StellarNetwork, WalletState, WalletType } from "../types"
 import { createStellarError, toStellarError } from "../errors"
 import { getWalletAdapter, hasWalletAdapter } from "../wallets"
 import type { WalletAdapter, WalletChange } from "../wallets"
@@ -25,7 +25,8 @@ interface PersistedSession {
   address?: string
 }
 
-function getStorage(kind: AutoConnectOptions["storage"]): Storage | null {
+function getStorage(kind: AutoConnectOptions["storage"]): SessionStorageAdapter | null {
+  if (kind && typeof kind === "object") return kind
   if (!isBrowser()) return null
 
   try {
@@ -44,12 +45,12 @@ function getStorage(kind: AutoConnectOptions["storage"]): Storage | null {
  * A stored value is attacker-influenced input in an XSS scenario, so it is
  * validated before it ever reaches the registry.
  */
-function readSession(kind: AutoConnectOptions["storage"]): PersistedSession | null {
+async function readSession(kind: AutoConnectOptions["storage"]): Promise<PersistedSession | null> {
   const storage = getStorage(kind)
   if (!storage) return null
 
   try {
-    const raw = storage.getItem(WALLET_SESSION_STORAGE_KEY)
+    const raw = await storage.getItem(WALLET_SESSION_STORAGE_KEY)
     if (!raw) return null
 
     const parsed: unknown = JSON.parse(raw)
@@ -67,15 +68,15 @@ function readSession(kind: AutoConnectOptions["storage"]): PersistedSession | nu
   }
 }
 
-function writeSession(kind: AutoConnectOptions["storage"], session: PersistedSession | null): void {
+async function writeSession(kind: AutoConnectOptions["storage"], session: PersistedSession | null): Promise<void> {
   const storage = getStorage(kind)
   if (!storage) return
 
   try {
     if (session) {
-      storage.setItem(WALLET_SESSION_STORAGE_KEY, JSON.stringify(session))
+      await storage.setItem(WALLET_SESSION_STORAGE_KEY, JSON.stringify(session))
     } else {
-      storage.removeItem(WALLET_SESSION_STORAGE_KEY)
+      await storage.removeItem(WALLET_SESSION_STORAGE_KEY)
     }
   } catch {
     // Quota exceeded, or storage disabled mid-session. Losing the ability to
@@ -172,7 +173,7 @@ export function useWallet(): UseWalletReturn {
         restoredWalletRef.current = null
 
         if (autoConnect.enabled) {
-          writeSession(autoConnect.storage, {
+          void writeSession(autoConnect.storage, {
             wallet: String(connection.wallet),
             ...(autoConnect.persistAddress ? { address: connection.address } : {}),
           })
@@ -199,7 +200,7 @@ export function useWallet(): UseWalletReturn {
     }
 
     restoredWalletRef.current = null
-    writeSession(autoConnect.storage, null)
+    void writeSession(autoConnect.storage, null)
 
     safeSetWallet({
       connected: false,
@@ -243,13 +244,12 @@ export function useWallet(): UseWalletReturn {
   useEffect(() => {
     if (!autoConnect.enabled || !isBrowser()) return
 
-    const session = readSession(autoConnect.storage)
-    if (!session) return
-
     let cancelled = false
 
     void (async () => {
       try {
+        const session = await readSession(autoConnect.storage)
+        if (!session || cancelled || !mountedRef.current) return
         const adapter = getWalletAdapter(session.wallet)
 
         const available = await adapter.isAvailable()
@@ -280,7 +280,7 @@ export function useWallet(): UseWalletReturn {
       } catch {
         // A wallet that cannot be restored is not an error the user caused —
         // they simply start from a disconnected UI.
-        writeSession(autoConnect.storage, null)
+        void writeSession(autoConnect.storage, null)
       }
     })()
 

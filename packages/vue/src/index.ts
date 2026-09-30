@@ -1,3 +1,7 @@
 export * from "./useAnchor"
 export * from "./useTransactionHistory"
 export * from "./useAccount"
+export * from "./plugin"
+export * from "./keys"
+export * from "./useStellarRuntime"
+export * from "./useWallet"
