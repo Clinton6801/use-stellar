@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef } from "react"
 import { useStellarContext } from "../context/StellarProvider"
 import { isBrowser } from "../utils"
-import type { AutoConnectOptions, StellarNetwork, WalletState, WalletType } from "../types"
+import type { StellarNetwork, WalletState, WalletType } from "../types"
 import { createStellarError, toStellarError } from "../errors"
 import { getWalletAdapter } from "../wallets"
 import { readWalletSession, writeWalletSession } from "../runtime/walletSession"
@@ -109,7 +109,7 @@ export function useWallet(): UseWalletReturn {
         restoredWalletRef.current = null
 
         if (autoConnect.enabled) {
-          writeWalletSession(autoConnect.storage, {
+          void writeWalletSession(autoConnect.storage, {
             wallet: String(connection.wallet),
             ...(autoConnect.persistAddress ? { address: connection.address } : {}),
           })
@@ -136,7 +136,7 @@ export function useWallet(): UseWalletReturn {
     }
 
     restoredWalletRef.current = null
-    writeWalletSession(autoConnect.storage, null)
+    void writeWalletSession(autoConnect.storage, null)
 
     safeSetWallet({
       connected: false,
@@ -180,13 +180,13 @@ export function useWallet(): UseWalletReturn {
   useEffect(() => {
     if (!autoConnect.enabled || !isBrowser()) return
 
-    const session = readWalletSession(autoConnect.storage)
-    if (!session) return
-
     let cancelled = false
 
     void (async () => {
       try {
+        const session = await readWalletSession(autoConnect.storage)
+        if (!session || cancelled || !mountedRef.current) return
+
         const adapter = getWalletAdapter(session.wallet)
 
         const available = await adapter.isAvailable()
@@ -217,7 +217,7 @@ export function useWallet(): UseWalletReturn {
       } catch {
         // A wallet that cannot be restored is not an error the user caused —
         // they simply start from a disconnected UI.
-        writeWalletSession(autoConnect.storage, null)
+        void writeWalletSession(autoConnect.storage, null)
       }
     })()
 
